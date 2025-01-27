@@ -40,3 +40,4 @@ int main(void){
     
     return 0;
 }
+// My stupid ass was assigning userinput to num so the game was unwinable!!!
