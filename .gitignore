@@ -1,3 +1,4 @@
 harvard-c
 *.exe
 # ! <--this negates the pattern 
+.vscode
