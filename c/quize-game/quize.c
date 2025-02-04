@@ -10,7 +10,7 @@ int main(void){
     char options [][100] = {"A. 2022", "B. 1972", "C. 1975", "D. 54BC",
                             "A. John lemon", "B. Dennis Ritchie", "C. Nikola Tesla", "D. John Carmack",
                             "A. B","B. Objective C", "C. Latin", "D. C#",
-                            "A. Burger", "B. Pizza", "C. Broke Soupe", "D. Tortoise"};
+                            "A. Burger", "B. Pizza", "C. Poverty Soupe or Noodle", "D. Tortoise"};
 
     char answers[4] = {'B', 'B', 'A', 'B'};
 
