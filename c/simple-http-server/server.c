@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <winsock2.h> // socket header file is os specific linux: <sys/socket.h>
-#include <sys/types.h>
 
 #pragma comment(lib, "ws2_32.hlib") //Link with winsock library
 
@@ -26,7 +25,6 @@ while on Linux they are file descriptors (integers).
 */
 
 #define PORT 40000
-#define bufferSize  104857600
 
 // Initialize winsocket
 void init_winsock();
@@ -40,7 +38,7 @@ int main(void)
     // Create a socket
     SOCKET socket_server = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(socket_server == INVALID_SOCKET){
-        printf("Socket creation failed with error %d", WSAGetLastError);
+        printf("Socket creation failed with error %d", WSAGetLastError());
         cleanup_winsock();
         return 1;
     }
@@ -52,8 +50,55 @@ int main(void)
     server_addr.sin_port = htons(PORT); // listen on port 40000
 
     // bind the socket to the port and address
-    
+    if (bind(socket_server, (struct sockaddr*)&server_addr, sizeof(server_addr)) == SOCKET_ERROR){
+        printf("Bind failed with error %d", WSAGetLastError());
+        closesocket(socket_server);
+        cleanup_winsock();
+        return 1;
+    }
 
+    // Start listennig for incoming connection 
+    if(listen(socket_server, SOMAXCONN) == SOCKET_ERROR){
+        printf("Listen failed with error %d", WSAGetLastError());
+        closesocket(socket_server);
+        cleanup_winsock();
+        return 1;
+    }
+
+    printf("server is listening on port %d", PORT);
+
+    //Accept incoming connection
+    SOCKET client_socket;
+    struct sockaddr_in client_addr;
+    int client_size = sizeof(client_addr);
+    client_socket = accept(socket_server, (struct sockaddr*)&client_addr, &client_size);
+    if (client_socket == INVALID_SOCKET){
+        printf("Accept failed with error %d", WSAGetLastError());
+        closesocket(socket_server);
+        cleanup_winsock();
+        return 1;
+    }
+
+    printf("Client connected/n");
+
+    // Recieve http request from client
+    char buffer[1024];
+    int recv_size = recv(client_socket, buffer, sizeof(buffer), 0);
+    if (recv_size > 0){
+        buffer[recv_size] = '\0'; // Null teminate recieved data
+        printf("Recieved request:\n %s \n", buffer);
+
+        // Simple http response
+        const char *response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"
+                               "<html><body><h1>Hello, World!</h1></body></html>";
+        send(client_socket, response, strlen(response), 0);
+
+    }
+
+    // Close the connection 
+    closesocket(client_socket);
+    closesocket(socket_server);
+    cleanup_winsock();
 
     return 0;
 }
